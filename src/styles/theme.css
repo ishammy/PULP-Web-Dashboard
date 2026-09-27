@@ -1,0 +1,126 @@
+/* PULP Design Tokens & Color System */
+
+:root {
+  /* Warm Paper Palette (Default Light Theme) */
+  --bg-app: #F7F3EE;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #FCFAF8;
+  --bg-surface-subtle: #F2ECE4;
+  --bg-surface-sunken: #EBE3D8;
+  
+  --border-card: #E8DFD5;
+  --border-subtle: #F0EAE2;
+  --border-focus: #C48270;
+  
+  /* Brand Accent Colors */
+  --brand-terracotta: #C48270;
+  --brand-terracotta-hover: #B2705E;
+  --brand-terracotta-light: #F8EFE9;
+  --brand-terracotta-glow: rgba(196, 130, 112, 0.25);
+  
+  --brand-sage: #4E7E49;
+  --brand-sage-hover: #416B3D;
+  --brand-sage-light: #EDF5EC;
+  --brand-sage-glow: rgba(78, 126, 73, 0.25);
+  
+  --brand-coral: #DF6F60;
+  --brand-coral-hover: #CF5F50;
+  --brand-coral-light: #FDF1EE;
+  
+  --brand-amber: #D9822B;
+  --brand-amber-light: #FEF7EE;
+
+  /* Typography Colors */
+  --text-primary: #342D29;
+  --text-secondary: #746860;
+  --text-muted: #9E928A;
+  --text-inverse: #FFFFFF;
+  
+  /* Terminal / Dark surface */
+  --terminal-bg: #27211E;
+  --terminal-bar: #1C1715;
+  --terminal-border: #3A322D;
+  --terminal-text: #EFE8E1;
+  --terminal-green: #68B359;
+  --terminal-yellow: #E5AC48;
+  --terminal-red: #E86558;
+  --terminal-cyan: #58B2C4;
+
+  /* Gauge & Progress */
+  --gauge-track: #EFE7DE;
+  --gauge-fill: #C48270;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(60, 45, 35, 0.05);
+  --shadow-md: 0 4px 14px rgba(60, 45, 35, 0.07);
+  --shadow-lg: 0 12px 28px rgba(60, 45, 35, 0.10);
+  --shadow-floating: 0 20px 40px rgba(45, 30, 25, 0.16);
+  --shadow-glow: 0 0 20px var(--brand-terracotta-glow);
+
+  /* Radius */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --radius-full: 9999px;
+
+  /* Font Families */
+  --font-display: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Layout dimensions */
+  --header-height: 64px;
+  --bottom-nav-height: 72px;
+  --max-content-width: 1140px;
+}
+
+/* Dark Theme (Cyber Industrial / Dark Paper) */
+[data-theme="dark"] {
+  --bg-app: #151210;
+  --bg-surface: #1E1A17;
+  --bg-surface-elevated: #26211E;
+  --bg-surface-subtle: #2C2622;
+  --bg-surface-sunken: #181412;
+
+  --border-card: #332B25;
+  --border-subtle: #2A231E;
+  --border-focus: #D78F7D;
+
+  --brand-terracotta: #D78F7D;
+  --brand-terracotta-hover: #E49E8D;
+  --brand-terracotta-light: #322521;
+  --brand-terracotta-glow: rgba(215, 143, 125, 0.35);
+
+  --brand-sage: #66A35F;
+  --brand-sage-hover: #77B670;
+  --brand-sage-light: #212B20;
+  --brand-sage-glow: rgba(102, 163, 95, 0.35);
+
+  --brand-coral: #E67768;
+  --brand-coral-hover: #F2897B;
+  --brand-coral-light: #352320;
+
+  --brand-amber: #E29542;
+  --brand-amber-light: #332417;
+
+  --text-primary: #F4EFEB;
+  --text-secondary: #B8ADA5;
+  --text-muted: #857971;
+  --text-inverse: #151210;
+
+  --terminal-bg: #15110F;
+  --terminal-bar: #0E0B0A;
+  --terminal-border: #2A221E;
+  --terminal-text: #F0EAE4;
+
+  --gauge-track: #2B231E;
+  --gauge-fill: #D78F7D;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+  --shadow-floating: 0 20px 48px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 24px var(--brand-terracotta-glow);
+}
