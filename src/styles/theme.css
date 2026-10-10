@@ -1,126 +1,133 @@
-/* PULP Design Tokens & Color System */
-
 :root {
-  /* Warm Paper Palette (Default Light Theme) */
-  --bg-app: #F7F3EE;
+  /* Cozy Warm Paper Palette */
+  --bg-app: #FAF7F2;
   --bg-surface: #FFFFFF;
-  --bg-surface-elevated: #FCFAF8;
-  --bg-surface-subtle: #F2ECE4;
-  --bg-surface-sunken: #EBE3D8;
-  
-  --border-card: #E8DFD5;
-  --border-subtle: #F0EAE2;
-  --border-focus: #C48270;
-  
-  /* Brand Accent Colors */
-  --brand-terracotta: #C48270;
-  --brand-terracotta-hover: #B2705E;
-  --brand-terracotta-light: #F8EFE9;
-  --brand-terracotta-glow: rgba(196, 130, 112, 0.25);
-  
-  --brand-sage: #4E7E49;
-  --brand-sage-hover: #416B3D;
-  --brand-sage-light: #EDF5EC;
-  --brand-sage-glow: rgba(78, 126, 73, 0.25);
-  
-  --brand-coral: #DF6F60;
-  --brand-coral-hover: #CF5F50;
-  --brand-coral-light: #FDF1EE;
-  
-  --brand-amber: #D9822B;
-  --brand-amber-light: #FEF7EE;
+  --bg-surface-elevated: #FCFAF7;
+  --bg-surface-subtle: #F4EFEB;
+  --bg-surface-sunken: #ECE5DE;
+
+  --border-card: #E8E0D7;
+  --border-subtle: #F0E9E2;
+  --border-focus: #C47B62;
+
+  /* Cozy Warm Brand Accents */
+  --brand-terracotta: #C47B62;
+  --brand-terracotta-hover: #B26A52;
+  --brand-terracotta-light: #F7EEEA;
+  --brand-terracotta-glow: rgba(196, 123, 98, 0.2);
+
+  --brand-sage: #528254;
+  --brand-sage-hover: #446E46;
+  --brand-sage-light: #EEF5EF;
+  --brand-sage-glow: rgba(82, 130, 84, 0.2);
+
+  --brand-coral: #D96052;
+  --brand-coral-hover: #C54E40;
+  --brand-coral-light: #FDEEED;
+
+  --brand-amber: #D17D2C;
+  --brand-amber-light: #FEF6ED;
 
   /* Typography Colors */
-  --text-primary: #342D29;
-  --text-secondary: #746860;
-  --text-muted: #9E928A;
+  --text-primary: #2C241E;
+  --text-secondary: #6A5E55;
+  --text-muted: #968A81;
   --text-inverse: #FFFFFF;
-  
-  /* Terminal / Dark surface */
-  --terminal-bg: #27211E;
-  --terminal-bar: #1C1715;
-  --terminal-border: #3A322D;
-  --terminal-text: #EFE8E1;
-  --terminal-green: #68B359;
-  --terminal-yellow: #E5AC48;
-  --terminal-red: #E86558;
-  --terminal-cyan: #58B2C4;
 
-  /* Gauge & Progress */
-  --gauge-track: #EFE7DE;
-  --gauge-fill: #C48270;
-  
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(60, 45, 35, 0.05);
-  --shadow-md: 0 4px 14px rgba(60, 45, 35, 0.07);
-  --shadow-lg: 0 12px 28px rgba(60, 45, 35, 0.10);
-  --shadow-floating: 0 20px 40px rgba(45, 30, 25, 0.16);
+  /* Terminal Surface */
+  --terminal-bg: #221C18;
+  --terminal-bar: #1A1512;
+  --terminal-border: #332B25;
+  --terminal-text: #F0E9E2;
+  --terminal-green: #6BB563;
+  --terminal-yellow: #E5AC48;
+  --terminal-red: #E56457;
+  --terminal-cyan: #5BB6C7;
+
+  /* Progress & Gauge */
+  --gauge-track: #EFE8E1;
+  --gauge-fill: #C47B62;
+
+  /* Soft Organic Shadows */
+  --shadow-sm: 0 1px 3px rgba(55, 40, 30, 0.04);
+  --shadow-md: 0 4px 16px rgba(55, 40, 30, 0.06);
+  --shadow-lg: 0 10px 28px rgba(55, 40, 30, 0.08);
+  --shadow-floating: 0 18px 36px rgba(45, 30, 20, 0.12);
   --shadow-glow: 0 0 20px var(--brand-terracotta-glow);
 
-  /* Radius */
+  /* Friendly Rounded Radii */
   --radius-xs: 6px;
   --radius-sm: 10px;
   --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 26px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
   --radius-full: 9999px;
 
-  /* Font Families */
-  --font-display: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  /* Subtle Paper Texture & Minimal Crumple Effects */
+  --paper-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paperNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.038 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paperNoise)'/%3E%3C/svg%3E");
+  --paper-crease: linear-gradient(118deg, transparent 46%, rgba(255, 255, 255, 0.45) 49%, rgba(65, 45, 30, 0.025) 51%, transparent 54%),
+    linear-gradient(28deg, transparent 63%, rgba(255, 255, 255, 0.35) 66%, rgba(65, 45, 30, 0.02) 68%, transparent 71%),
+    linear-gradient(198deg, transparent 36%, rgba(255, 255, 255, 0.25) 39%, rgba(65, 45, 30, 0.02) 41%, transparent 44%);
+
+  /* Consistent Unified Fonts */
+  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  /* Layout dimensions */
+  /* Layout */
   --header-height: 64px;
-  --bottom-nav-height: 72px;
-  --max-content-width: 1140px;
+  --bottom-nav-height: 68px;
+  --max-content-width: 1220px;
 }
 
-/* Dark Theme (Cyber Industrial / Dark Paper) */
 [data-theme="dark"] {
-  --bg-app: #151210;
-  --bg-surface: #1E1A17;
-  --bg-surface-elevated: #26211E;
-  --bg-surface-subtle: #2C2622;
-  --bg-surface-sunken: #181412;
+  --bg-app: #14110E;
+  --bg-surface: #1C1815;
+  --bg-surface-elevated: #241F1B;
+  --bg-surface-subtle: #2B2420;
+  --bg-surface-sunken: #181411;
 
-  --border-card: #332B25;
-  --border-subtle: #2A231E;
-  --border-focus: #D78F7D;
+  --border-card: #2F2620;
+  --border-subtle: #261F1A;
+  --border-focus: #D78A73;
 
-  --brand-terracotta: #D78F7D;
-  --brand-terracotta-hover: #E49E8D;
-  --brand-terracotta-light: #322521;
-  --brand-terracotta-glow: rgba(215, 143, 125, 0.35);
+  --brand-terracotta: #D78A73;
+  --brand-terracotta-hover: #E39983;
+  --brand-terracotta-light: #2D211C;
+  --brand-terracotta-glow: rgba(215, 138, 115, 0.3);
 
-  --brand-sage: #66A35F;
-  --brand-sage-hover: #77B670;
-  --brand-sage-light: #212B20;
-  --brand-sage-glow: rgba(102, 163, 95, 0.35);
+  --brand-sage: #6AA568;
+  --brand-sage-hover: #7AB478;
+  --brand-sage-light: #1C271B;
+  --brand-sage-glow: rgba(106, 165, 104, 0.3);
 
-  --brand-coral: #E67768;
-  --brand-coral-hover: #F2897B;
-  --brand-coral-light: #352320;
+  --brand-coral: #E06C5F;
+  --brand-coral-hover: #EC7D70;
+  --brand-coral-light: #2E1D1B;
 
-  --brand-amber: #E29542;
-  --brand-amber-light: #332417;
+  --brand-amber: #DD8E3E;
+  --brand-amber-light: #2D2015;
 
-  --text-primary: #F4EFEB;
-  --text-secondary: #B8ADA5;
-  --text-muted: #857971;
-  --text-inverse: #151210;
+  --text-primary: #F3EEEA;
+  --text-secondary: #B4A79E;
+  --text-muted: #80746C;
+  --text-inverse: #14110E;
 
-  --terminal-bg: #15110F;
-  --terminal-bar: #0E0B0A;
-  --terminal-border: #2A221E;
-  --terminal-text: #F0EAE4;
+  --terminal-bg: #110E0C;
+  --terminal-bar: #0C0A09;
+  --terminal-border: #241E1A;
+  --terminal-text: #EDE5DE;
 
-  --gauge-track: #2B231E;
-  --gauge-fill: #D78F7D;
+  --gauge-track: #261F1B;
+  --gauge-fill: #D78A73;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
-  --shadow-floating: 0 20px 48px rgba(0, 0, 0, 0.7);
-  --shadow-glow: 0 0 24px var(--brand-terracotta-glow);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.45);
+  --shadow-floating: 0 18px 36px rgba(0, 0, 0, 0.55);
+
+  --paper-grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paperNoiseDark'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paperNoiseDark)'/%3E%3C/svg%3E");
+  --paper-crease: linear-gradient(118deg, transparent 86%, rgba(255, 255, 255, 0.04) 89%, rgba(0, 0, 0, 0.08) 81%, transparent 84%),
+    linear-gradient(28deg, transparent 83%, rgba(255, 255, 255, 0.03) 86%, rgba(0, 0, 0, 0.07) 88%, transparent 81%),
+    linear-gradient(198deg, transparent 86%, rgba(255, 255, 255, 0.025) 89%, rgba(0, 0, 0, 0.08) 81%, transparent 84%);
 }

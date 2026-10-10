@@ -6,7 +6,6 @@ export default function TimelineCard() {
 
   const stages = telemetry.timeline || [];
 
-  // Compute rail height percentage
   let activeIndex = stages.findIndex(s => s.status === 'In Progress');
   let progressPercent = 0;
 
@@ -25,14 +24,10 @@ export default function TimelineCard() {
   return (
     <section className="panel-card" aria-label="Operational Timeline">
       <div className="panel-title">
-        <span>Operational Timeline</span>
-        <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-          {telemetry.status}
-        </span>
+        <span>Cycle Stages</span>
       </div>
 
       <div className="timeline-stages-list">
-        {/* Vertical Rail Background and Fill */}
         <div className="timeline-track-rail"></div>
         <div className="timeline-track-fill" style={{ height: `${progressPercent}%` }}></div>
 

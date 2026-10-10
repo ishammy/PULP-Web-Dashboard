@@ -25,18 +25,18 @@ export default function TerminalDrawer() {
   };
 
   const handleChipClick = (cmd) => {
+    if (cmd === '/clear') {
+      return;
+    }
     executeCommand(cmd);
   };
 
   const quickChips = [
     { label: '/help', cmd: '/help' },
-    { label: '/status', cmd: '/status' },
-    { label: '/start', cmd: '/start' },
-    { label: '/stop', cmd: '/stop' },
-    { label: '/feed', cmd: '/feed' },
-    { label: '/docs', cmd: '/docs' },
-    { label: '/temp 48', cmd: '/temp 48' },
-    { label: '/water 85', cmd: '/water 85' },
+    { label: '/status', cmd: 'status' },
+    { label: '/start', cmd: 'START_BATCH' },
+    { label: '/stop', cmd: 'END_BATCH' },
+    { label: '/ping', cmd: 'HI' },
     { label: '/clear', cmd: '/clear' }
   ];
 
@@ -54,11 +54,11 @@ export default function TerminalDrawer() {
             <span className="t-dot yellow"></span>
             <span className="t-dot green"></span>
           </div>
-          <span className="terminal-title">pulp-edge-controller:~ /dev/ttyAMA0</span>
-          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Type /help</span>
+          <span className="terminal-title">Diagnostic Console</span>
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Console Session Active</span>
         </div>
 
-        {/* Quick Command Action Chips for mobile thumb access */}
+        {/* Quick Command Action Chips */}
         <div className="terminal-chips-bar" aria-label="Quick Commands">
           {quickChips.map(c => (
             <button
@@ -75,7 +75,7 @@ export default function TerminalDrawer() {
         {/* Scrollable Logs Output */}
         <div className="terminal-logs-pane" id="terminal-logs-container">
           {logs.map((log, idx) => (
-            <div key={idx} className={`log-entry ${log.level}`}>
+            <div key={idx} className={`log-entry ${log.level || log.type || ''}`}>
               <span style={{ opacity: 0.6 }}>[{log.time_display}]</span> {log.message}
             </div>
           ))}
@@ -84,12 +84,12 @@ export default function TerminalDrawer() {
 
         {/* Command Input Bar */}
         <form className="terminal-input-bar" onSubmit={handleSubmit}>
-          <span className="terminal-prompt-prefix">pulp&gt;</span>
+          <span className="terminal-prompt-prefix">&gt;</span>
           <input
             ref={inputRef}
             type="text"
             className="terminal-input"
-            placeholder="Type command (/help, /status, /start, /stop, /temp 45...)"
+            placeholder="Type command (/help, status, START_BATCH, END_BATCH...)"
             value={commandInput}
             onChange={e => setCommandInput(e.target.value)}
             autoComplete="off"

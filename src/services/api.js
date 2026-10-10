@@ -1,211 +1,296 @@
-// PULP Real Backend API Client
-// Connects to the backend server running on http://127.0.0.1:1234
-// (Routed via Vite dev proxy /api or direct fetch)
-
-const API_BASE = ''; // empty string uses Vite proxy or same-origin /api
-
-async function apiFetch(endpoint, options = {}) {
-  const method = options.method || 'GET';
-  const fetchOptions = {
-    method,
-    headers: {
-      'Accept': 'application/json',
-      ...(options.headers || {})
-    }
-  };
-
-  if (options.body) {
-    fetchOptions.headers['Content-Type'] = 'application/json';
-    fetchOptions.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
-  }
-
-  try {
-    const response = await fetch(`${API_BASE}${endpoint}`, fetchOptions);
-    const contentType = response.headers.get('content-type') || '';
-    let data = null;
-
-    if (contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      const text = await response.text();
-      try { data = JSON.parse(text); } catch (_) { data = { raw: text }; }
-    }
-
-    return {
-      ok: response.ok,
-      status: response.status,
-      data: data
-    };
-  } catch (networkError) {
-    return {
-      ok: false,
-      status: 0,
-      data: { status: 'error', message: networkError.message }
-    };
-  }
-}
-
-function normalizeTelemetry(payload) {
-  if (!payload) return null;
-  const d = payload.data || payload;
-
-  const water = (d.sensors && typeof d.sensors.water_level === 'number')
-    ? d.sensors.water_level
-    : (typeof d.water_level === 'number' ? d.water_level : 0);
-
-  const temp = (d.sensors && typeof d.sensors.temperature === 'number')
-    ? d.sensors.temperature
-    : (typeof d.temperature === 'number' ? d.temperature : 25);
-
-  const weight = (d.sensors && typeof d.sensors.weight === 'number')
-    ? d.sensors.weight
-    : (typeof d.weight === 'number' ? d.weight : 0);
-
-  return {
-    state: d.state || d.status || 'IDLE',
-    status: d.status || d.state || 'IDLE',
-    mode: d.mode || 'Scan-Shred',
-    paper_size: d.paper_size || '8.5" x 13"',
-    progress_percent: typeof d.progress_percent === 'number' ? d.progress_percent : 0,
-    current_process: d.current_process || 'READY',
-    scanned_pages: typeof d.scanned_pages === 'number' ? d.scanned_pages : 0,
-    awaiting_paper: Boolean(d.awaiting_paper),
-    hardware_display_prompt: d.hardware_display_prompt || '',
-    generated_this_batch: typeof d.generated_this_batch === 'number' ? d.generated_this_batch : 0,
-    daily_total: typeof d.daily_total === 'number' ? d.daily_total : 0,
-    lifetime_total: typeof d.lifetime_total === 'number' ? d.lifetime_total : 0,
-    water_level: Math.round(water * 10) / 10,
-    temperature: Math.round(temp * 10) / 10,
-    weight: Math.round(weight * 10) / 10,
-    sensors: {
-      water_level: Math.round(water * 10) / 10,
-      temperature: Math.round(temp * 10) / 10,
-      weight: Math.round(weight * 10) / 10
-    },
-    mechanical: d.mechanical || null,
-    hydration: d.hydration || null,
-    thermal: d.thermal || null,
-    edge_controller: d.edge_controller || null,
-    sustainability: d.sustainability || null,
-    timeline: Array.isArray(d.timeline) ? d.timeline : [],
-    security_locked: Boolean(d.security_locked),
-    timestamp: d.timestamp || Date.now() / 1000
-  };
-}
+const API_BASE = '';
+const TOKEN_KEY = 'pulp_admin_jwt';
 
 export const API = {
-  async getTelemetry() {
-    const res = await apiFetch('/api/telemetry');
-    if (!res.ok) {
-      return { success: false, error: res.data?.message || 'Hardware API unreachable' };
+  getToken() {
+    try {
+      return localStorage.getItem(TOKEN_KEY) || null;
+    } catch (_) {
+      return null;
     }
-    return { success: true, data: normalizeTelemetry(res.data) };
   },
 
-  async startBatch(mode = 'Scan-Shred') {
-    const res = await apiFetch('/api/control/start', {
+  setToken(token) {
+    try {
+      if (token) {
+        localStorage.setItem(TOKEN_KEY, token);
+      } else {
+        localStorage.removeItem(TOKEN_KEY);
+      }
+    } catch (_) { }
+  },
+
+  clearToken() {
+    try {
+      localStorage.removeItem(TOKEN_KEY);
+    } catch (_) { }
+  },
+
+  async request(endpoint, options = {}) {
+    const method = options.method || 'GET';
+    const token = this.getToken();
+
+    const headers = {
+      Accept: 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {})
+    };
+
+    let body = options.body;
+    let isUrlEncoded = false;
+
+
+    if (body && typeof body === 'object' && !(body instanceof FormData)) {
+      if (!headers['Content-Type']) {
+        headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        body = new URLSearchParams(body).toString();
+        isUrlEncoded = true;
+      } else if (headers['Content-Type'] === 'application/json') {
+        body = JSON.stringify(body);
+      }
+    }
+
+    const fetchOptions = {
+      method,
+      headers,
+      body
+    };
+
+    try {
+      let response = await fetch(`${API_BASE}${endpoint}`, fetchOptions);
+
+
+      if (response.status === 415 && isUrlEncoded && typeof options.body === 'object') {
+        headers['Content-Type'] = 'application/json';
+        fetchOptions.body = JSON.stringify(options.body);
+        response = await fetch(`${API_BASE}${endpoint}`, fetchOptions);
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      let data = null;
+
+      if (contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        try {
+          data = JSON.parse(text);
+        } catch (_) {
+          data = { msg: text, raw: text };
+        }
+      }
+
+      return {
+        ok: response.ok,
+        status: response.status,
+        data: data || {}
+      };
+    } catch (networkError) {
+      return {
+        ok: false,
+        status: 0,
+        data: { status: 'error', msg: networkError.message }
+      };
+    }
+  },
+
+  async getNotifications() {
+    const res = await this.request('/api/notifications');
+    return {
+      ok: res.ok,
+      status: res.status,
+      notifications: Array.isArray(res.data?.notifications) ? res.data.notifications : [],
+      msg: res.data?.msg || '',
+      raw: res.data
+    };
+  },
+
+
+  async getFiles() {
+    const res = await this.request('/api/files');
+    return {
+      ok: res.ok,
+      status: res.status,
+      files: Array.isArray(res.data?.files) ? res.data.files : [],
+      msg: res.data?.msg || '',
+      raw: res.data
+    };
+  },
+
+
+  async retrieveFile(pin) {
+    const res = await this.request('/api/file', {
       method: 'POST',
-      body: { mode }
+      body: { pin: String(pin).trim() }
     });
     return {
       ok: res.ok,
       status: res.status,
-      ...(res.data || {})
+      data: res.data,
+      file: res.data?.file || null,
+      msg: res.data?.msg || ''
     };
   },
 
-  async scanPage() {
-    const res = await apiFetch('/api/control/scan-page', {
+  async loginAdmin(username, password) {
+    const res = await this.request('/api/admin/login', {
       method: 'POST',
-      body: {}
+      body: { username, password }
     });
+
+    const isSuccess = res.ok && res.data?.status === 'ok';
+    if (isSuccess && res.data?.msg) {
+      this.setToken(res.data.msg);
+    }
+
+    return {
+      ok: isSuccess,
+      status: res.status,
+      token: isSuccess ? res.data?.msg : null,
+      msg: res.data?.msg || '',
+      raw: res.data
+    };
+  },
+
+  logoutAdmin() {
+    this.clearToken();
+  },
+
+
+  async getWifi() {
+    const res = await this.request('/api/admin/wifi');
+    const isUp = res.data?.status === 'ok' && !res.data?.msg?.toLowerCase().includes('down');
     return {
       ok: res.ok,
       status: res.status,
-      ...(res.data || {})
+      isUp,
+      msg: res.data?.msg || (isUp ? 'WiFi is UP' : 'WiFi is DOWN'),
+      raw: res.data
     };
   },
 
-  async proceedToShred() {
-    const res = await apiFetch('/api/control/proceed-to-shred', {
-      method: 'POST',
-      body: {}
-    });
+
+  async getWifiDevices() {
+    const res = await this.request('/api/admin/wifi/devices');
     return {
       ok: res.ok,
       status: res.status,
-      ...(res.data || {})
+      devices: Array.isArray(res.data?.devices) ? res.data.devices : [],
+      msg: res.data?.msg || '',
+      raw: res.data
     };
   },
 
-  async emergencyStop() {
-    const res = await apiFetch('/api/control/emergency-stop', {
-      method: 'POST',
-      body: {}
-    });
-    return {
-      ok: res.ok,
-      status: res.status,
-      ...(res.data || {})
-    };
-  },
-
-  async resetSystem() {
-    const res = await apiFetch('/api/control/reset', {
-      method: 'POST',
-      body: {}
-    });
-    return {
-      ok: res.ok,
-      status: res.status,
-      ...(res.data || {})
-    };
-  },
-
-  async updateSettings(mode) {
-    const res = await apiFetch('/api/control/settings', {
-      method: 'POST',
-      body: { mode }
-    });
-    return {
-      ok: res.ok,
-      status: res.status,
-      ...(res.data || {})
-    };
-  },
-
-  async getTerminalLogs() {
-    const res = await apiFetch('/api/terminal/logs');
-    return res.data?.logs || [];
-  },
 
   async sendTerminalCommand(command) {
-    const res = await apiFetch('/api/terminal/command', {
+    const res = await this.request('/api/admin/terminal', {
       method: 'POST',
       body: { command }
     });
-    return res.data || { success: false, output: 'Failed to communicate with controller.' };
+    return {
+      ok: res.ok,
+      status: res.status,
+      msg: res.data?.msg || (res.ok ? 'Command executed successfully.' : 'Command error'),
+      raw: res.data
+    };
   },
 
-  async getDocuments(search = '') {
-    const query = search ? `?search=${encodeURIComponent(search)}` : '';
-    const res = await apiFetch(`/api/documents${query}`);
-    return res.data?.documents || [];
+
+  async getBatchStatus() {
+    const res = await this.request('/api/admin/status/batch');
+    return {
+      ok: res.ok,
+      status: res.status,
+      batch: res.data?.batch || { papers: 0 },
+      msg: res.data?.msg || '',
+      raw: res.data
+    };
   },
 
-  async retrieveDocument(docId, pin) {
-    const res = await apiFetch('/api/documents/retrieve', {
-      method: 'POST',
-      body: { doc_id: docId, pin: pin }
-    });
-    return res;
+
+  async getStatistics() {
+    const res = await this.request('/api/admin/status/statistics');
+    return {
+      ok: res.ok,
+      status: res.status,
+      statistics: res.data?.statistics || { papers_processed: 0 },
+      msg: res.data?.msg || '',
+      raw: res.data
+    };
   },
 
-  async adminUnlock() {
-    const res = await apiFetch('/api/admin/unlock', {
-      method: 'POST',
-      body: {}
-    });
-    return res.data || { success: false, message: 'Unlock request failed' };
+
+  connectTelemetryWebSocket({ onMessage, onStatusChange, onError }) {
+    let ws = null;
+    let reconnectTimer = null;
+    let isDisposed = false;
+
+    const connect = () => {
+      if (isDisposed) return;
+      try {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const host = window.location.host || '127.0.0.1:5173';
+        const url = `${protocol}//${host}/api/admin/status/telemetry`;
+
+        ws = new WebSocket(url);
+
+        ws.onopen = () => {
+          if (isDisposed) return;
+          if (onStatusChange) onStatusChange(true);
+        };
+
+        ws.onmessage = (event) => {
+          if (isDisposed) return;
+          try {
+            const data = JSON.parse(event.data);
+            if (onMessage) onMessage(data);
+          } catch (_) { }
+        };
+
+        ws.onerror = (err) => {
+          if (isDisposed) return;
+          if (onError) onError(err);
+        };
+
+        ws.onclose = () => {
+          if (isDisposed) return;
+          if (onStatusChange) onStatusChange(false);
+          reconnectTimer = setTimeout(connect, 2500);
+        };
+      } catch (_) {
+        if (!isDisposed) {
+          if (onStatusChange) onStatusChange(false);
+          reconnectTimer = setTimeout(connect, 2500);
+        }
+      }
+    };
+
+    connect();
+
+    return () => {
+      isDisposed = true;
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      if (ws) {
+        ws.onclose = null;
+        ws.close();
+      }
+    };
+  },
+
+  base64ToPdfBlobUrl(base64Data) {
+    if (!base64Data) return null;
+    try {
+      const cleanBase64 = base64Data.replace(/^data:application\/pdf;base64,/, '').trim();
+      const byteCharacters = atob(cleanBase64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      return URL.createObjectURL(blob);
+    } catch (_) {
+      return null;
+    }
   }
 };

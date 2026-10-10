@@ -4,7 +4,7 @@ import { usePulp } from '../../context/PulpContext';
 export default function SystemControlsCard() {
   const { telemetry, startBatch, emergencyStop, resetSystem, setMode } = usePulp();
 
-  const isBusy = telemetry.status === 'PROCESSING' || telemetry.status === 'SCANNING';
+  const isBusy = telemetry.status === 'PROCESSING';
   const isHalted = telemetry.status === 'EMERGENCY_STOP';
 
   const handleStart = () => {
@@ -27,7 +27,6 @@ export default function SystemControlsCard() {
       </div>
 
       <div className="controls-actions-row">
-
         <button
           type="button"
           className="btn-start"
@@ -40,7 +39,7 @@ export default function SystemControlsCard() {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}>
                 <circle cx="12" cy="12" r="10" strokeDasharray="32" strokeDashoffset="12"></circle>
               </svg>
-              <span>{telemetry.status === 'SCANNING' ? 'Feeding...' : 'Processing...'}</span>
+              <span>Processing...</span>
             </>
           ) : isHalted ? (
             <>
@@ -59,7 +58,6 @@ export default function SystemControlsCard() {
             </>
           )}
         </button>
-
 
         <button
           type="button"
@@ -87,7 +85,6 @@ export default function SystemControlsCard() {
         </button>
       </div>
 
-
       <div className="controls-secondary-bar">
         <div className="mode-selector" aria-label="Mode Selection">
           <button
@@ -97,7 +94,7 @@ export default function SystemControlsCard() {
             disabled={isBusy || isHalted}
             id="mode-btn-scanshred"
           >
-            Scan-Shred
+            Scan & Shred
           </button>
           <button
             type="button"
@@ -106,11 +103,11 @@ export default function SystemControlsCard() {
             disabled={isBusy || isHalted}
             id="mode-btn-shredonly"
           >
-            Shred-Only
+            Shred Only
           </button>
         </div>
 
-        <div className="paper-size-pill" title="Fixed institutional paper dimensions">
+        <div className="paper-size-pill" title="Sheet format">
           8.5" × 13"
         </div>
       </div>

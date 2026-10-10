@@ -2,7 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { usePulp } from '../context/PulpContext';
 
 export default function Header() {
-  const { telemetry, activeTab, setActiveTab, toggleTerminal, theme, toggleTheme, isConnected } = usePulp();
+  const {
+    currentPath,
+    navigate,
+    isAdmin,
+    logoutAdmin,
+    telemetry,
+    toggleTerminal,
+    theme,
+    toggleTheme,
+    isConnected,
+    notifications,
+    toggleNotifications,
+    wifi
+  } = usePulp();
+
   const [timeStr, setTimeStr] = useState('');
 
   useEffect(() => {
@@ -15,29 +29,18 @@ export default function Header() {
     return () => clearInterval(timer);
   }, []);
 
-  const isHalted = telemetry.status === 'EMERGENCY_STOP';
-  const isBusy = telemetry.status === 'PROCESSING' || telemetry.status === 'SCANNING';
-
-  const statusLabel = !isConnected
-    ? 'BACKEND OFFLINE'
-    : isHalted
-      ? 'HALTED'
-      : isBusy
-        ? telemetry.current_process
-        : 'READY';
-
-  const statusClass = !isConnected
-    ? 'halted'
-    : isHalted
-      ? 'halted'
-      : isBusy
-        ? 'active'
-        : '';
+  const isAdminView = currentPath.startsWith('/admin') && isAdmin;
+  const isBusy = telemetry.status === 'PROCESSING';
 
   return (
     <header className="top-header">
       <div className="header-left">
-        <div className="brand-badge" title="PULP Micro-Paper Recycling System">
+        <div
+          className="brand-badge"
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate('/')}
+          title="PULP Document System"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
@@ -48,44 +51,50 @@ export default function Header() {
           <span>PULP</span>
         </div>
 
-        <div
-          className={`header-status-pill ${statusClass}`}
-          title={isConnected ? 'Connected to backend server on port 1234' : 'Connecting to backend on http://localhost:1234...'}
-        >
-          <span className="live-pulse-dot"></span>
-          <span>{statusLabel}</span>
-        </div>
 
         <span className="header-clock">{timeStr}</span>
       </div>
 
-      <nav className="desktop-tab-nav" aria-label="Desktop Navigation">
-        <button
-          className={`nav-pill-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-          onClick={() => setActiveTab('dashboard')}
-          id="btn-tab-dashboard"
-        >
-          Dashboard
-        </button>
-        <button
-          className={`nav-pill-btn ${activeTab === 'retrieval' ? 'active' : ''}`}
-          onClick={() => setActiveTab('retrieval')}
-          id="btn-tab-retrieval"
-        >
-          File Vault
-        </button>
-        {/* <button
-          className={`nav-pill-btn ${activeTab === 'diagnostics' ? 'active' : ''}`}
-          onClick={() => setActiveTab('diagnostics')}
-          id="btn-tab-diagnostics"
-        >
-          Diagnostics
-        </button> */}
-      </nav>
-
       <div className="header-actions">
-        {/* Theme Toggle */}
+
+        {/* Notifications Icon Button */}
         <button
+          className="icon-btn"
+          onClick={toggleNotifications}
+          title="System Notifications"
+          aria-label="Toggle Notifications"
+          id="btn-notifications-toggle"
+          style={{ position: 'relative' }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          {notifications.length > 0 && (
+            <span
+              style={{
+                position: 'absolute',
+                top: '-2px',
+                right: '-2px',
+                background: 'var(--brand-terracotta)',
+                color: '#fff',
+                fontSize: '0.62rem',
+                fontWeight: 700,
+                borderRadius: '50%',
+                width: '15px',
+                height: '15px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              {notifications.length}
+            </span>
+          )}
+        </button>
+
+        {/* Theme Toggle */}
+        {/* <button
           className="icon-btn"
           onClick={toggleTheme}
           title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
@@ -109,21 +118,41 @@ export default function Header() {
               <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
             </svg>
           )}
-        </button>
+        </button> */}
 
-        {/* Terminal Quick Button */}
-        <button
-          className="icon-btn"
-          onClick={toggleTerminal}
-          title="Open Diagnostic Terminal"
-          aria-label="Toggle Terminal"
-          id="btn-terminal-quick"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="4 17 10 11 4 5"></polyline>
-            <line x1="12" y1="19" x2="20" y2="19"></line>
-          </svg>
-        </button>
+        {/* Admin only features */}
+        {isAdminView && (
+          <>
+            <button
+              className="icon-btn"
+              onClick={toggleTerminal}
+              title="Console"
+              aria-label="Toggle Terminal"
+              id="btn-terminal-quick"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              className="nav-pill-btn"
+              style={{
+                fontSize: '0.78rem',
+                padding: '6px 12px',
+                color: 'var(--brand-coral)',
+                borderColor: 'rgba(217, 96, 82, 0.3)'
+              }}
+              onClick={logoutAdmin}
+              title="Sign out of Admin Session"
+              id="btn-admin-logout"
+            >
+              Log Out
+            </button>
+          </>
+        )}
       </div>
     </header>
   );

@@ -1,14 +1,23 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { API } from '../../services/api';
 
 export default function DocumentPreviewModal({ docData, onClose }) {
   if (!docData) return null;
 
-  const downloadHref = docData.download_url || `/download/${docData.doc_id}`;
-  const downloadFilename = `${docData.doc_id}.pdf`;
+  const pdfBlobUrl = useMemo(() => {
+    if (docData.file) {
+      return API.base64ToPdfBlobUrl(docData.file);
+    }
+    return null;
+  }, [docData.file]);
+
+  const docId = docData.doc_id || 'document';
+  const docDate = docData.timestamp || 'Recent';
+  const downloadFilename = `${docId}.pdf`;
 
   return (
     <div className={`doc-modal-backdrop ${docData ? 'open' : ''}`} onClick={onClose} id="doc-decrypted-modal">
-      <div className="doc-modal-card" onClick={e => e.stopPropagation()}>
+      <div className="doc-modal-card" style={{ maxWidth: '600px' }} onClick={e => e.stopPropagation()}>
         <div className="doc-modal-header">
           <div className="doc-modal-title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -21,15 +30,32 @@ export default function DocumentPreviewModal({ docData, onClose }) {
           </button>
         </div>
 
-        <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem' }}>
-            <strong>DOC_ID:</strong> {docData.doc_id} &nbsp;|&nbsp; <strong>Scanned:</strong> {docData.timestamp}
-          </div>
+        <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', display: 'flex', gap: '8px' }}>
+          <span><strong>Document:</strong> #{docId}</span>
+          <span>&bull;</span>
+          <span><strong>Archived:</strong> {docDate}</span>
         </div>
 
-        {docData.preview_text && (
-          <div className="doc-preview-body">
-            {docData.preview_text}
+        {pdfBlobUrl ? (
+          <div style={{
+            background: 'var(--bg-surface-sunken)',
+            border: '1px solid var(--border-card)',
+            borderRadius: 'var(--radius-md)',
+            overflow: 'hidden',
+            height: '260px',
+            display: 'flex',
+            flexDirection: 'column',
+            marginTop: '6px'
+          }}>
+            <iframe
+              src={pdfBlobUrl}
+              title={`PDF Preview ${docId}`}
+              style={{ width: '100%', height: '100%', border: 'none' }}
+            />
+          </div>
+        ) : (
+          <div className="doc-preview-body" style={{ marginTop: '6px' }}>
+            Document successfully decrypted and ready to download.
           </div>
         )}
 
@@ -38,7 +64,7 @@ export default function DocumentPreviewModal({ docData, onClose }) {
             Close
           </button>
           <a
-            href={downloadHref}
+            href={pdfBlobUrl || '#'}
             download={downloadFilename}
             className="btn-download-pdf"
             id="btn-download-pdf-file"
@@ -48,7 +74,7 @@ export default function DocumentPreviewModal({ docData, onClose }) {
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            <span>Download Decrypted PDF</span>
+            <span>Download PDF</span>
           </a>
         </div>
       </div>
