@@ -1,4 +1,4 @@
-const API_BASE = '';
+const API_BASE = 'http://192.168.1.26:8080';
 const TOKEN_KEY = 'pulp_admin_jwt';
 
 export const API = {
