@@ -1,9 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { usePulp } from '../../context/PulpContext';
 
+const PIN_LENGTH = 10;
+const PIN_DASH_INDICES = [3, 6];
+
 export default function PinPasscodeEntry({ selectedDoc, onDecrypted }) {
   const { retrieveDocument } = usePulp();
-  const [pinDigits, setPinDigits] = useState(Array(6).fill(''));
+  const [pinDigits, setPinDigits] = useState(Array(PIN_LENGTH).fill(''));
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,7 +21,7 @@ export default function PinPasscodeEntry({ selectedDoc, onDecrypted }) {
     setPinDigits(nextDigits);
     setErrorMessage('');
 
-    if (cleanChar && idx < 5) {
+    if (cleanChar && idx < PIN_LENGTH - 1) {
       inputsRef.current[idx + 1]?.focus();
     }
   };
@@ -34,7 +37,7 @@ export default function PinPasscodeEntry({ selectedDoc, onDecrypted }) {
       }
     } else if (e.key === 'ArrowLeft' && idx > 0) {
       inputsRef.current[idx - 1]?.focus();
-    } else if (e.key === 'ArrowRight' && idx < 5) {
+    } else if (e.key === 'ArrowRight' && idx < PIN_LENGTH - 1) {
       inputsRef.current[idx + 1]?.focus();
     }
   };
@@ -42,22 +45,22 @@ export default function PinPasscodeEntry({ selectedDoc, onDecrypted }) {
   const handlePaste = (e) => {
     e.preventDefault();
     const paste = (e.clipboardData || window.clipboardData).getData('text');
-    const cleanChars = paste.replace(/[^0-9a-zA-Z]/g, '').slice(0, 6).split('');
-    const nextDigits = Array(6).fill('');
+    const cleanChars = paste.replace(/[^0-9a-zA-Z]/g, '').slice(0, PIN_LENGTH).split('');
+    const nextDigits = Array(PIN_LENGTH).fill('');
     cleanChars.forEach((ch, i) => {
       nextDigits[i] = ch;
     });
     setPinDigits(nextDigits);
 
-    const targetIdx = Math.min(cleanChars.length, 5);
+    const targetIdx = Math.min(cleanChars.length, PIN_LENGTH - 1);
     inputsRef.current[targetIdx]?.focus();
   };
 
   const handleRetrieve = async () => {
     setErrorMessage('');
     const fullPin = pinDigits.join('');
-    if (fullPin.length !== 6) {
-      setErrorMessage(`Please enter all 6 digits of the passcode.`);
+    if (fullPin.length !== PIN_LENGTH) {
+      setErrorMessage(`Please enter all ${PIN_LENGTH} digits of the passcode.`);
       return;
     }
 
@@ -66,7 +69,7 @@ export default function PinPasscodeEntry({ selectedDoc, onDecrypted }) {
       const res = await retrieveDocument(fullPin);
       const data = res.data || res;
       if (res.ok && data.status === 'ok') {
-        setPinDigits(Array(6).fill(''));
+        setPinDigits(Array(PIN_LENGTH).fill(''));
         onDecrypted({
           doc_id: selectedDoc?.id || selectedDoc?.doc_id || '01-0222344',
           timestamp: selectedDoc?.date || selectedDoc?.timestamp || 'Recent',
@@ -107,9 +110,9 @@ export default function PinPasscodeEntry({ selectedDoc, onDecrypted }) {
       </div>
 
       <div className="pin-boxes-container" onPaste={handlePaste}>
-        {Array.from({ length: 6 }).map((_, idx) => (
+        {Array.from({ length: PIN_LENGTH }).map((_, idx) => (
           <React.Fragment key={idx}>
-            {idx === 3 && <span className="pin-dash">-</span>}
+            {PIN_DASH_INDICES.includes(idx) && <span className="pin-dash">-</span>}
             <input
               ref={el => (inputsRef.current[idx] = el)}
               type="text"

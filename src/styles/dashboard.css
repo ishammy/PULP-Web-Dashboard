@@ -1763,6 +1763,25 @@ main {
   transition: all 0.15s ease;
 }
 
+@media (max-width: 479px) {
+  .pin-boxes-container {
+    gap: 4px;
+  }
+
+  .pin-input-box {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    max-width: 40px;
+    height: 48px;
+    font-size: 1.15rem;
+  }
+
+  .pin-dash {
+    flex: 0 0 auto;
+  }
+}
+
 @media (min-width: 480px) {
   .pin-input-box {
     width: 48px;

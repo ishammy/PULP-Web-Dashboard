@@ -50,6 +50,9 @@ export function PulpProvider({ children }) {
 
   // Admin Authentication State
   const [isAdmin, setIsAdmin] = useState(() => Boolean(API.getToken()));
+  // Bumped on every login/logout so the telemetry socket reconnects with the
+  // current token.
+  const [authVersion, setAuthVersion] = useState(0);
 
   // Notifications (User facing: GET /api/notifications)
   const [notifications, setNotifications] = useState([]);
@@ -149,9 +152,28 @@ export function PulpProvider({ children }) {
     return () => {
       cleanupWs();
     };
+  }, [authVersion]);
+
+  // 2. Check the stored token on start: an expired or revoked token must not
+  // keep the admin view alive.
+  useEffect(() => {
+    let cancelled = false;
+
+    const validateToken = async () => {
+      if (!API.getToken()) return;
+      const res = await API.getMe();
+      if (cancelled) return;
+      if (!res.ok) {
+        API.clearToken();
+        setIsAdmin(false);
+      }
+    };
+
+    validateToken();
+    return () => { cancelled = true; };
   }, []);
 
-  // 2. Fetch Notifications (User facing)
+  // 3. Fetch Notifications (User facing)
   const fetchNotifications = useCallback(async () => {
     try {
       const res = await API.getNotifications();
@@ -162,7 +184,7 @@ export function PulpProvider({ children }) {
     } catch (_) {}
   }, []);
 
-  // 3. Fetch Files (User facing)
+  // 4. Fetch Files (User facing)
   const fetchFiles = useCallback(async () => {
     try {
       const res = await API.getFiles();
@@ -179,7 +201,7 @@ export function PulpProvider({ children }) {
     } catch (_) {}
   }, []);
 
-  // 4. Fetch Wi-Fi status & devices (Admin feature)
+  // 5. Fetch Wi-Fi status & devices (Admin feature)
   const fetchWifi = useCallback(async () => {
     try {
       const [wifiRes, devRes] = await Promise.all([
@@ -191,7 +213,7 @@ export function PulpProvider({ children }) {
     } catch (_) {}
   }, []);
 
-  // 5. Fetch Batch & Statistics (Admin feature)
+  // 6. Fetch Batch & Statistics (Admin feature)
   const fetchAdminStatus = useCallback(async () => {
     try {
       const [batchRes, statsRes] = await Promise.all([
@@ -245,6 +267,7 @@ export function PulpProvider({ children }) {
     const res = await API.loginAdmin(username, password);
     if (res.ok) {
       setIsAdmin(true);
+      setAuthVersion(v => v + 1);
       navigate('/admin');
       fetchWifi();
       fetchAdminStatus();
@@ -253,9 +276,10 @@ export function PulpProvider({ children }) {
   };
 
   // Admin Logout
-  const logoutAdmin = () => {
-    API.logoutAdmin();
+  const logoutAdmin = async () => {
+    await API.logoutAdmin();
     setIsAdmin(false);
+    setAuthVersion(v => v + 1);
     setIsTerminalOpen(false);
     navigate('/');
   };

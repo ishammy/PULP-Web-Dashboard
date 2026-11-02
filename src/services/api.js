@@ -1,5 +1,4 @@
-const API_BASE = 'http://192.168.1.26:8080';
-const TOKEN_KEY = 'pulp_admin_jwt';
+const API_BASE = 'http://192.168.4.1:8080';
 
 export const API = {
   getToken() {
@@ -152,8 +151,37 @@ export const API = {
     };
   },
 
-  logoutAdmin() {
+  async logoutAdmin() {
+    // Revoke the token on the server, then drop it locally.
+    try {
+      await this.request('/api/admin/logout', { method: 'POST' });
+    } catch (_) { }
     this.clearToken();
+  },
+
+  async getMe() {
+    const res = await this.request('/api/admin/me');
+    return {
+      ok: res.ok,
+      status: res.status,
+      username: res.data?.username || '',
+      expiresAt: res.data?.expires_at || '',
+      raw: res.data
+    };
+  },
+
+  async refreshToken() {
+    const res = await this.request('/api/admin/refresh', { method: 'POST' });
+    const isSuccess = res.ok && res.data?.status === 'ok' && !!res.data?.msg;
+    if (isSuccess) {
+      this.setToken(res.data.msg);
+    }
+    return {
+      ok: isSuccess,
+      status: res.status,
+      token: isSuccess ? res.data?.msg : null,
+      raw: res.data
+    };
   },
 
 
@@ -228,9 +256,12 @@ export const API = {
     const connect = () => {
       if (isDisposed) return;
       try {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const host = window.location.host || '127.0.0.1:5173';
-        const url = `${protocol}//${host}/api/admin/status/telemetry`;
+        // The telemetry socket lives on the API server and needs the token:
+        // a browser cannot set headers on a WebSocket, so it goes in the query.
+        const base = API_BASE.replace(/^http/, 'ws');
+        const token = this.getToken();
+        const query = token ? `?token=${encodeURIComponent(token)}` : '';
+        const url = `${base}/api/admin/status/telemetry${query}`;
 
         ws = new WebSocket(url);
 
