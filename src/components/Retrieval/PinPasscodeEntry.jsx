@@ -2,6 +2,8 @@ import React, { useRef, useState } from 'react';
 import { usePulp } from '../../context/PulpContext';
 
 const PIN_LENGTH = 10;
+// The station's 4x4 keypad: 0-9, A-D, * and #. Lower case a-d is the same key.
+const keepKeypadKeys = (text) => text.toUpperCase().replace(/[^0-9A-D*#]/g, '');
 const PIN_DASH_INDICES = [3, 6];
 
 export default function PinPasscodeEntry({ selectedDoc, onDecrypted }) {
@@ -14,7 +16,7 @@ export default function PinPasscodeEntry({ selectedDoc, onDecrypted }) {
 
   const handleInputChange = (idx, e) => {
     const rawVal = e.target.value;
-    const cleanChar = rawVal.replace(/[^0-9a-zA-Z]/g, '').slice(-1);
+    const cleanChar = keepKeypadKeys(rawVal).slice(-1);
 
     const nextDigits = [...pinDigits];
     nextDigits[idx] = cleanChar;
@@ -45,7 +47,7 @@ export default function PinPasscodeEntry({ selectedDoc, onDecrypted }) {
   const handlePaste = (e) => {
     e.preventDefault();
     const paste = (e.clipboardData || window.clipboardData).getData('text');
-    const cleanChars = paste.replace(/[^0-9a-zA-Z]/g, '').slice(0, PIN_LENGTH).split('');
+    const cleanChars = keepKeypadKeys(paste).slice(0, PIN_LENGTH).split('');
     const nextDigits = Array(PIN_LENGTH).fill('');
     cleanChars.forEach((ch, i) => {
       nextDigits[i] = ch;
@@ -60,7 +62,7 @@ export default function PinPasscodeEntry({ selectedDoc, onDecrypted }) {
     setErrorMessage('');
     const fullPin = pinDigits.join('');
     if (fullPin.length !== PIN_LENGTH) {
-      setErrorMessage(`Please enter all ${PIN_LENGTH} digits of the passcode.`);
+      setErrorMessage(`Please enter all ${PIN_LENGTH} keys of the passcode.`);
       return;
     }
 
